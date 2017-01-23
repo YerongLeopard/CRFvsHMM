@@ -35,12 +35,14 @@ def train_HMM(FILE_NAME):
 	f_in=open(FILE_NAME,'r')
 	record1=""
 	record2=f_in.readline()
-
+	## Starting state
 	tag2, obs2=record2.split()
 	A[NUM_TAG,DICT_TAG[tag2]]+=1;
 	record1=record2
 	record2=f_in.readline()
+	## Starting state
 	count=1
+
 	while count < LENG:
 		count+=1
 		tag1, obs1=record1.split()
