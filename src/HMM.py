@@ -22,6 +22,10 @@ def load_data(FILE_NAME):
 	return count, DICT_TAG, DICT_OBS
 
 def train_HMM(FILE_NAME):
+	'''
+	Input : file name
+	Outpur: Length of the sequence, dictionaries and trained matrices
+	'''
 	# Loading data, determing the dimensions and building dictionaries
 	LENG, DICT_TAG, DICT_OBS=load_data(FILE_NAME)
 
@@ -57,7 +61,6 @@ def train_HMM(FILE_NAME):
 def main():
 	FILE_NAME="../hw4data/ron.txt"
 	LENG, DICT_TAG, DICT_OBS, A, O= train_HMM(FILE_NAME)
-	print A
 	
 
 if __name__== "__main__":
