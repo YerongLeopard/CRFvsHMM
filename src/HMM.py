@@ -21,7 +21,7 @@ def load_data(FILE_NAME):
 			NUM_OBS+=1
 	return count, DICT_TAG, DICT_OBS
 
-def train_HMM(FILE_NAME):
+def sup_train_HMM(FILE_NAME):
 	'''
 	Input : file name
 	Outpur: Length of the sequence, dictionaries and trained matrices
@@ -30,7 +30,7 @@ def train_HMM(FILE_NAME):
 	LENG, DICT_TAG, DICT_OBS=load_data(FILE_NAME)
 
 	NUM_TAG=len(DICT_TAG); NUM_OBS=len(DICT_OBS)
-	A=np.zeros([NUM_TAG+2, NUM_TAG+2])# A is arranged in the order of 0, 1, 2 ,START END
+	A=np.zeros([NUM_TAG+1, NUM_TAG+2])# A is arranged in the order of 0, 1, 2 ,START END
 	O=np.zeros([NUM_TAG, NUM_OBS])
 	f_in=open(FILE_NAME,'r')
 	record1=""
@@ -55,14 +55,20 @@ def train_HMM(FILE_NAME):
 	tag1, obs1=record1.split()
 	A[DICT_TAG[tag1],NUM_TAG+1]+=1;
 	assert record2=="", "Have NOT reached the EOF"
-	###
-	### add more codes here
-	###
+	### normalization
+	for idx, numer in enumerate(A):
+		deno=sum(numer)
+		A[idx]=numer/deno
+	for idx, numer in enumerate(O):
+		deno=sum(numer)
+		O[idx]=numer/deno
+	print O
+	### normalization
 	return LENG, DICT_TAG, DICT_OBS, A, O
 
 def main():
 	FILE_NAME="../hw4data/ron.txt"
-	LENG, DICT_TAG, DICT_OBS, A, O= train_HMM(FILE_NAME)
+	LENG, DICT_TAG, DICT_OBS, A, O= sup_train_HMM(FILE_NAME)
 	
 
 if __name__== "__main__":
