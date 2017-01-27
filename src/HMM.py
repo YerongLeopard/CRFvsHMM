@@ -66,9 +66,16 @@ def sup_train_HMM(FILE_NAME):
 	### normalization
 	return LENG, DICT_TAG, DICT_OBS, A, O
 
+def viterbi_HMM(A, O, sequence):
+	assert A.__len__()-1==O.__len__(), "Dimensions of A and O mismatch."
+	gen_prob=np.zeros([1,O.__len__()])
+	
+	return
+
 def main():
 	FILE_NAME="../hw4data/ron.txt"
 	LENG, DICT_TAG, DICT_OBS, A, O= sup_train_HMM(FILE_NAME)
+	viterbi_HMM(A, O, [1])
 	
 
 if __name__== "__main__":
