@@ -1,4 +1,11 @@
 import numpy as np#
+def ln(num):
+	import numpy as np
+	if num>0:
+		return np.log(num)
+	else: 
+		return -np.inf
+
 def load_data(FILE_NAME):
 	'''
 	Load data from a text file
@@ -52,6 +59,7 @@ def sup_train_HMM(DICT_TAG, DICT_OBS,seq_tag, seq_obs):
 	tag1_v=seq_tag[count-1]; obs1_v=seq_obs[count-1]
 
 	A[tag1_v,NUM_TAG]+=1;
+	O[tag1_v,obs1_v]+=1;
 	### normalization
 	for idx, numer in enumerate(A):
 		deno=sum(numer)
@@ -78,11 +86,11 @@ def eq_END(A):
 def viterbi_HMM(A, O, seq_obs, seq_tag):
 	assert A.__len__()-1==O.__len__(), "Dimensions of A and O mismatch."
 	NUM_TAG=O.__len__()
-	gen_Lprob=np.array([-np.log(A[-1, tag_v])-np.log(O[tag_v,seq_obs[0]]) for tag_v in range(NUM_TAG)])
+	gen_Lprob=np.array([-ln(A[-1, tag_v])-ln(O[tag_v,seq_obs[0]]) for tag_v in range(NUM_TAG)])
 	ending=np.zeros(NUM_TAG)
 	gen_table=[]; it=0; seq_pdc=[]
 
-	omit_Lprob=-np.log(A[-1, seq_tag[0]])-np.log(O[seq_tag[0],seq_obs[0]])
+	omit_Lprob=-ln(A[-1, seq_tag[0]])-ln(O[seq_tag[0],seq_obs[0]])
 	LENG=len(seq_obs)
 
 	for it in range(LENG-1):#LENG-1
@@ -90,12 +98,12 @@ def viterbi_HMM(A, O, seq_obs, seq_tag):
 		print it
 		print gen_Lprob,'gen_Lprob', omit_Lprob, 'omit_Lprob'
 		for tag_v in range(NUM_TAG):
-			tmp_Lprob=[Lprob_it-np.log(A[pre_tag, tag_v])-np.log(O[tag_v,seq_obs[it+1]]) for pre_tag ,Lprob_it in enumerate(gen_Lprob)]
+			tmp_Lprob=[Lprob_it-ln(A[pre_tag, tag_v])-ln(O[tag_v,seq_obs[it+1]]) for pre_tag ,Lprob_it in enumerate(gen_Lprob)]
 			bkup_gen_Lprob[tag_v]=min(tmp_Lprob)
 			ending[tag_v]=np.argmin(tmp_Lprob)
 		gen_Lprob=bkup_gen_Lprob
 		print ending, 'ending'
-		omit_Lprob+=-np.log(A[seq_tag[it], seq_tag[it+1]])-np.log(O[seq_tag[it+1],seq_obs[it+1]])
+		omit_Lprob+=-ln(A[seq_tag[it], seq_tag[it+1]])-ln(O[seq_tag[it+1],seq_obs[it+1]])
 		gen_table=gen_table+[[int(tag_v) for tag_v in ending]]
 		print gen_Lprob,'gen_Lprob', omit_Lprob, 'omit_Lprob'
    	print gen_Lprob,'gen_Lprob', omit_Lprob, 'omit_Lprob'
@@ -117,8 +125,8 @@ def	backtrack(end_tag_v, gen_table):
 
 def loss_Hamming(seq_pdc, seq_tag):
 	#assert len(seq_pdc)==len(seq_obs), 'Predicted sequence and observed sequence have difference length.'
-	print seq_pdc[0:11],'seq_pdc[0:11]'
-	print seq_tag[0:11],'seq_obs[0:11]'
+	print seq_pdc,'seq_pdc'
+	print seq_tag,'seq_obs'
 	#return np.count_nonzero([x-y for x,y in zip(seq_pdc, seq_obs)])
 
 def main():
@@ -128,6 +136,7 @@ def main():
 
 	A=eq_START(A); A=eq_END(A)
 	print A, 'A'
+	print O, 'O'
 	seq_pdc=viterbi_HMM(A, O, seq_obs, seq_tag)
 	print loss_Hamming(seq_pdc,seq_tag)
 
