@@ -1,4 +1,4 @@
-import numpy as np
+import numpy as np#
 def load_data(FILE_NAME):
 	'''
 	Load data from a text file
@@ -10,7 +10,7 @@ def load_data(FILE_NAME):
 	NUM_TAG=0; NUM_OBS=0
 	f_in=open(FILE_NAME,'r')
 	record=f_in.readline()
-	while record!="":		
+	while record!="" :		
 		count+=1
 		tag, obs=record.split() # every record is a tag followed by an observation
 		record = f_in.readline()
@@ -43,7 +43,6 @@ def sup_train_HMM(DICT_TAG, DICT_OBS,seq_tag, seq_obs):
 	A[NUM_TAG,tag2_v]+=1;
 	## Starting state
 	count=1
-
 	while count < LENG:
 		tag1_v=seq_tag[count-1]; obs1_v=seq_obs[count-1]
 		tag2_v=seq_tag[count]  ; obs2_v=seq_obs[count]
@@ -76,31 +75,33 @@ def eq_END(A):
 		A[idx,-1]=1.0/NUM_TAG
 	return A	
 
-def viterbi_HMM(A, O, seq_obs):
+def viterbi_HMM(A, O, seq_obs, seq_tag):
 	assert A.__len__()-1==O.__len__(), "Dimensions of A and O mismatch."
 	NUM_TAG=O.__len__()
 	gen_Lprob=np.array([-np.log(A[-1, tag_v])-np.log(O[tag_v,seq_obs[0]]) for tag_v in range(NUM_TAG)])
 	ending=np.zeros(NUM_TAG)
-	gen_table=[]
-	seq_tag=[]
+	gen_table=[]; it=0; seq_pdc=[]
 
+	omit_Lprob=-np.log(A[-1, seq_tag[0]])-np.log(O[seq_tag[0],seq_obs[0]])
 	LENG=len(seq_obs)
-	for it in range(12-1):#LENG-1
+
+	for it in range(LENG-1):#LENG-1
 		bkup_gen_Lprob=np.zeros(NUM_TAG)
 		print it
-		print gen_Lprob,'gen_Lprob'
+		print gen_Lprob,'gen_Lprob', omit_Lprob, 'omit_Lprob'
 		for tag_v in range(NUM_TAG):
 			tmp_Lprob=[Lprob_it-np.log(A[pre_tag, tag_v])-np.log(O[tag_v,seq_obs[it+1]]) for pre_tag ,Lprob_it in enumerate(gen_Lprob)]
 			bkup_gen_Lprob[tag_v]=min(tmp_Lprob)
 			ending[tag_v]=np.argmin(tmp_Lprob)
 		gen_Lprob=bkup_gen_Lprob
-		print gen_Lprob,'gen_Lprob'
 		print ending, 'ending'
+		omit_Lprob+=-np.log(A[seq_tag[it], seq_tag[it+1]])-np.log(O[seq_tag[it+1],seq_obs[it+1]])
 		gen_table=gen_table+[[int(tag_v) for tag_v in ending]]
-
-	end_tag=np.argmin(gen_Lprob)
-
-	seq_pdc=backtrack(end_tag,gen_table)
+		print gen_Lprob,'gen_Lprob', omit_Lprob, 'omit_Lprob'
+   	print gen_Lprob,'gen_Lprob', omit_Lprob, 'omit_Lprob'
+	end_tag_v=np.argmin(gen_Lprob)
+	print end_tag_v, 'end_tag_v'
+	seq_pdc=backtrack(end_tag_v,gen_table)
 	return seq_pdc
 
 def	backtrack(end_tag_v, gen_table):
@@ -124,9 +125,10 @@ def main():
 	FILE_NAME="../hw4data/ron.txt"
 	LENG, DICT_TAG, DICT_OBS, seq_tag, seq_obs=load_data(FILE_NAME)
 	A, O=sup_train_HMM(DICT_TAG, DICT_OBS,seq_tag, seq_obs)
-	A=eq_START(A); A=eq_END(A)
 
-	seq_pdc=viterbi_HMM(A, O, seq_obs)
+	A=eq_START(A); A=eq_END(A)
+	print A, 'A'
+	seq_pdc=viterbi_HMM(A, O, seq_obs, seq_tag)
 	print loss_Hamming(seq_pdc,seq_tag)
 
 if __name__== "__main__":
